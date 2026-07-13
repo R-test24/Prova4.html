@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimentação de Estoque</title>
+
+    <style>
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background:#f4f4f4;
+            margin:0;
+        }
+
+        .container{
+            width:700px;
+            margin:40px auto;
+            background:#fff;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 0 10px rgba(0,0,0,.2);
+        }
+
+        h1{
+            text-align:center;
+            color:#333;
+        }
+
+        label{
+            display:block;
+            margin-top:10px;
+            font-weight:bold;
+        }
+
+        input, select{
+            width:100%;
+            padding:10px;
+            margin-top:5px;
+            border:1px solid #ccc;
+            border-radius:5px;
+        }
+
+        button{
+            width:100%;
+            margin-top:20px;
+            padding:12px;
+            border:none;
+            background:#28a745;
+            color:white;
+            font-size:16px;
+            border-radius:5px;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background:#218838;
+        }
+
+        table{
+            width:100%;
+            margin-top:25px;
+            border-collapse:collapse;
+        }
+
+        table th{
+            background:#007BFF;
+            color:white;
+            padding:10px;
+        }
+
+        table td{
+            border:1px solid #ddd;
+            padding:10px;
+            text-align:center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Movimentação de Estoque</h1>
+
+<label>Produto</label>
+<input type="text" id="produto">
+
+<label>Tipo</label>
+<select id="tipo">
+    <option>Entrada</option>
+    <option>Saída</option>
+</select>
+
+<label>Quantidade</label>
+<input type="number" id="quantidade">
+
+<label>Data</label>
+<input type="date" id="data">
+
+<button onclick="adicionar()">Registrar Movimentação</button>
+
+<table id="tabela">
+<thead>
+<tr>
+<th>Produto</th>
+<th>Tipo</th>
+<th>Quantidade</th>
+<th>Data</th>
+</tr>
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
+
+<script>
+
+function adicionar(){
+
+    let produto=document.getElementById("produto").value;
+    let tipo=document.getElementById("tipo").value;
+    let quantidade=document.getElementById("quantidade").value;
+    let data=document.getElementById("data").value;
+
+    if(produto=="" || quantidade=="" || data==""){
+        alert("Preencha todos os campos.");
+        return;
+    }
+
+    let tabela=document.getElementById("tabela").getElementsByTagName("tbody")[0];
+
+    let linha=tabela.insertRow();
+
+    linha.insertCell(0).innerHTML=produto;
+    linha.insertCell(1).innerHTML=tipo;
+    linha.insertCell(2).innerHTML=quantidade;
+    linha.insertCell(3).innerHTML=data;
+
+    document.getElementById("produto").value="";
+    document.getElementById("quantidade").value="";
+    document.getElementById("data").value="";
+
+}
+
+</script>
+
+</body>
+</html>
