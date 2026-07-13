@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Estoque — Cadastro de Produtos</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="10" width="26" height="16" rx="2" stroke="#E8A33D" stroke-width="2"/>
+        <path d="M2 16H28" stroke="#E8A33D" stroke-width="2"/>
+        <path d="M9 10V6C9 4.34315 10.3431 3 12 3H18C19.6569 3 21 4.34315 21 6V10" stroke="#E8A33D" stroke-width="2"/>
+      </svg>
+      Estoque<span style="color:#E8A33D">+</span>
+    </a>
+    <nav class="mainnav">
+      <a href="index.html">Início</a>
+      <a href="cadastro.html" class="active">Cadastro</a>
+      <a href="movimentacao.html">Movimentação</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <div class="page-head">
+    <span class="eyebrow">Etapa 01 · Cadastro</span>
+    <h1>Cadastro de Produtos</h1>
+    <p>Preencha os dados abaixo para adicionar um produto à lista desta sessão. Os campos marcados com * são obrigatórios.</p>
+  </div>
+
+  <div id="alertBox" class="alert"></div>
+
+  <div class="tag-card">
+    <div class="tag-card-body">
+      <form id="formCadastro" novalidate>
+        <div class="form-grid">
+
+          <div class="field" id="fieldCodigo">
+            <label for="codigo">Código do produto *</label>
+            <input type="text" id="codigo" placeholder="Ex: PRD-001" maxlength="15">
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field" id="fieldNome">
+            <label for="nome">Nome do produto *</label>
+            <input type="text" id="nome" placeholder="Ex: Caneta esferográfica" maxlength="60">
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field" id="fieldCategoria">
+            <label for="categoria">Categoria *</label>
+            <select id="categoria">
+              <option value="">Selecione…</option>
+              <option>Eletrônicos</option>
+              <option>Alimentos</option>
+              <option>Vestuário</option>
+              <option>Papelaria</option>
+              <option>Ferramentas</option>
+              <option>Outros</option>
+            </select>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field" id="fieldQuantidade">
+            <label for="quantidade">Quantidade inicial *</label>
+            <input type="number" id="quantidade" placeholder="Ex: 50" min="0" step="1">
+            <span class="hint">Número inteiro, maior ou igual a zero.</span>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="field" id="fieldPreco">
+            <label for="preco">Preço unitário (R$) *</label>
+            <input type="number" id="preco" placeholder="Ex: 2.50" min="0.01" step="0.01">
+            <span class="hint">Valor maior que zero, use ponto para centavos.</span>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Cadastrar produto</button>
+            <button type="reset" class="btn btn-ghost" id="btnLimpar">Limpar campos</button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="manifest-wrap">
+    <div class="manifest-head">
+      <h2>Produtos cadastrados nesta sessão</h2>
+      <span class="count" id="contadorProdutos">0 produto(s)</span>
+    </div>
+    <table class="manifest">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome</th>
+          <th>Categoria</th>
+          <th>Qtd.</th>
+          <th>Preço unit.</th>
+          <th>Valor total</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaProdutos">
+        <tr id="linhaVazia">
+          <td class="empty-state" colspan="6">Nenhum produto cadastrado nesta sessão ainda. Use o formulário acima para começar.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer>
+  Controle de Estoque — os dados desta página existem apenas durante a navegação atual (sem armazenamento).
+</footer>
+
+<script>
+  const produtosCadastrados = [];
+
+  const form = document.getElementById('formCadastro');
+  const alertBox = document.getElementById('alertBox');
+  const tabela = document.getElementById('tabelaProdutos');
+  const linhaVazia = document.getElementById('linhaVazia');
+  const contador = document.getElementById('contadorProdutos');
+
+  const campos = {
+    codigo: document.getElementById('codigo'),
+    nome: document.getElementById('nome'),
+    categoria: document.getElementById('categoria'),
+    quantidade: document.getElementById('quantidade'),
+    preco: document.getElementById('preco'),
+  };
+
+  function limparErro(campo) {
+    const wrapper = campo.closest('.field');
+    wrapper.classList.remove('error');
+    wrapper.querySelector('.error-msg').textContent = '';
+  }
+
+  function marcarErro(campo, mensagem) {
+    const wrapper = campo.closest('.field');
+    wrapper.classList.add('error');
+    wrapper.querySelector('.error-msg').textContent = mensagem;
+  }
+
+  function mostrarAlerta(mensagem, tipo) {
+    alertBox.textContent = mensagem;
+    alertBox.className = 'alert show ' + (tipo === 'erro' ? 'alert-error' : 'alert-success');
+    window.clearTimeout(mostrarAlerta._t);
+    mostrarAlerta._t = window.setTimeout(() => {
+      alertBox.classList.remove('show');
+    }, 4000);
+  }
+
+  function formatarMoeda(valor) {
+    return valor.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+  }
+
+  function validarFormulario() {
+    let valido = true;
+
+    Object.values(campos).forEach(limparErro);
+
+    const codigo = campos.codigo.value.trim();
+    if (codigo === '') {
+      marcarErro(campos.codigo, 'Informe o código do produto.');
+      valido = false;
+    } else if (produtosCadastrados.some(p => p.codigo.toLowerCase() === codigo.toLowerCase())) {
+      marcarErro(campos.codigo, 'Já existe um produto com este código nesta sessão.');
+      valido = false;
+    }
+
+    const nome = campos.nome.value.trim();
+    if (nome === '') {
+      marcarErro(campos.nome, 'Informe o nome do produto.');
+      valido = false;
+    }
+
+    const categoria = campos.categoria.value;
+    if (categoria === '') {
+      marcarErro(campos.categoria, 'Selecione uma categoria.');
+      valido = false;
+    }
+
+    const quantidade = campos.quantidade.value;
+    if (quantidade === '' || !Number.isInteger(Number(quantidade)) || Number(quantidade) < 0) {
+      marcarErro(campos.quantidade, 'Informe uma quantidade inteira maior ou igual a zero.');
+      valido = false;
+    }
+
+    const preco = campos.preco.value;
+    if (preco === '' || isNaN(Number(preco)) || Number(preco) <= 0) {
+      marcarErro(campos.preco, 'Informe um preço válido, maior que zero.');
+      valido = false;
+    }
+
+    return valido;
+  }
+
+  function renderizarTabela() {
+    if (produtosCadastrados.length === 0) {
+      tabela.innerHTML = '';
+      tabela.appendChild(linhaVazia);
+      contador.textContent = '0 produto(s)';
+      return;
+    }
+
+    tabela.innerHTML = '';
+    let valorGeral = 0;
+
+    produtosCadastrados.forEach(p => {
+      const valorTotal = p.quantidade * p.preco;
+      valorGeral += valorTotal;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.codigo}</td>
+        <td style="font-family: var(--font-body);">${p.nome}</td>
+        <td>${p.categoria}</td>
+        <td>${p.quantidade}</td>
+        <td>${formatarMoeda(p.preco)}</td>
+        <td>${formatarMoeda(valorTotal)}</td>
+      `;
+      tabela.appendChild(tr);
+    });
+
+    const trTotal = document.createElement('tr');
+    trTotal.className = 'totals-row';
+    trTotal.innerHTML = `
+      <td colspan="5">Valor total em estoque (sessão atual)</td>
+      <td>${formatarMoeda(valorGeral)}</td>
+    `;
+    tabela.appendChild(trTotal);
+
+    contador.textContent = produtosCadastrados.length + ' produto(s)';
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (!validarFormulario()) {
+      mostrarAlerta('Corrija os campos destacados antes de continuar.', 'erro');
+      return;
+    }
+
+    produtosCadastrados.push({
+      codigo: campos.codigo.value.trim(),
+      nome: campos.nome.value.trim(),
+      categoria: campos.categoria.value,
+      quantidade: Number(campos.quantidade.value),
+      preco: Number(campos.preco.value),
+    });
+
+    renderizarTabela();
+    mostrarAlerta('Produto "' + campos.nome.value.trim() + '" cadastrado com sucesso.', 'sucesso');
+    form.reset();
+    campos.codigo.focus();
+  });
+
+  document.getElementById('btnLimpar').addEventListener('click', function () {
+    Object.values(campos).forEach(limparErro);
+    alertBox.classList.remove('show');
+  });
+</script>
+
+</body>
+</html>
