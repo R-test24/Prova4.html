@@ -1,0 +1,39 @@
+name: Deploy do Site com GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # Baixa o código do repositório
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Configura o GitHub Pages
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      # Envia os arquivos do site
+      - name: Upload do site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      # Publica o site
+      - name: Deploy para GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
